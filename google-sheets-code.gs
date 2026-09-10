@@ -81,8 +81,7 @@ function getSelectedAnswer_(event) {
 }
 
 function getSuggestionText_(event) {
-  if (!['suggestion_typing', 'suggestion_submit'].includes(event.eventType)) return '';
-  return event.suggestionText || event.typedText || '';
+  return String(event.suggestionText || event.typedText || '').trim();
 }
 
 function getHeaderColumns_(sheet) {
@@ -119,20 +118,26 @@ function getSheet_() {
     sheet.appendRow(HEADERS);
   } else {
     const existingHeaders = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 1)).getValues()[0].map(String);
-    HEADERS.forEach((header) => {
-      if (!existingHeaders.includes(header)) {
-        sheet.getRange(1, sheet.getLastColumn() + 1).setValue(header);
-        existingHeaders.push(header);
-      }
-    });
-
     const suggestionColumn = existingHeaders.indexOf('suggestionText') + 1;
-    const lastColumn = sheet.getLastColumn();
-    if (suggestionColumn && suggestionColumn !== lastColumn) {
+    const lastDataColumn = existingHeaders.reduce((last, header, index) => {
+      return header && header !== 'suggestionText' ? index + 1 : last;
+    }, 0);
+    const targetSuggestionColumn = lastDataColumn + 1;
+
+    if (suggestionColumn && suggestionColumn !== targetSuggestionColumn) {
       const suggestionValues = sheet.getRange(1, suggestionColumn, sheet.getLastRow(), 1).getValues();
-      sheet.deleteColumn(suggestionColumn);
-      sheet.insertColumnAfter(sheet.getLastColumn());
-      sheet.getRange(1, sheet.getLastColumn(), suggestionValues.length, 1).setValues(suggestionValues);
+      sheet.getRange(1, targetSuggestionColumn, suggestionValues.length, 1).setValues(suggestionValues);
+      sheet.getRange(1, suggestionColumn, suggestionValues.length, 1).clearContent();
+    } else if (!suggestionColumn) {
+      sheet.getRange(1, targetSuggestionColumn).setValue('suggestionText');
+    }
+
+    const headersAfterSuggestion = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), targetSuggestionColumn)).getValues()[0].map(String);
+    HEADERS.forEach((header) => {
+      if (!headersAfterSuggestion.includes(header)) {
+        sheet.getRange(1, sheet.getLastColumn() + 1).setValue(header);
+        headersAfterSuggestion.push(header);
+      }
     }
   }
   return sheet;
