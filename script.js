@@ -100,6 +100,7 @@ function sendToGoogleSheet(eventType, extra = {}) {
 		activeStep,
 		optionText: extra.optionText || '',
 		typedText: extra.typedText || '',
+		suggestionText: extra.suggestionText || extra.typedText || '',
 		selectedDate: extra.selectedDate || '',
 		selectedPlan: extra.selectedPlan || '',
 		buttonText: extra.buttonText || '',
@@ -167,9 +168,13 @@ document.addEventListener('pointerdown', (event) => {
 
 document.addEventListener('click', (event) => {
 	if (event.target.closest('button')) playAudio(clickAudio);
+	const suggestionButton = event.target.closest('#suggestionBox');
+	const suggestionText = suggestionButton ? document.querySelector('#suggestionInput')?.value.trim() || '' : '';
 	logPublicInteraction('public_click', event, {
 		clickX: event.clientX,
 		clickY: event.clientY,
+		typedText: suggestionText,
+		suggestionText,
 		targetPath: event.composedPath ? event.composedPath().slice(0, 5).map((node) => node.tagName || node.id || node.className || 'root').join(' > ') : ''
 	});
 }, { capture: true });
@@ -247,14 +252,15 @@ document.querySelectorAll('.question-options .option').forEach((option) => optio
 
 if (suggestionInput) {
 	suggestionInput.addEventListener('input', () => {
-		sendToBackend('suggestion_typing', { typedText: suggestionInput.value.trim() });
+		const suggestionText = suggestionInput.value.trim();
+		sendToBackend('suggestion_typing', { typedText: suggestionText, suggestionText });
 	});
 }
 
 if (suggestionBox) {
 	suggestionBox.addEventListener('click', () => {
-		const typedText = suggestionInput ? suggestionInput.value.trim() : '';
-		sendToBackend('suggestion_submit', { typedText });
+		const suggestionText = suggestionInput ? suggestionInput.value.trim() : '';
+		sendToBackend('suggestion_submit', { typedText: suggestionText, suggestionText });
 		showStep('#step-nervous');
 	});
 }
