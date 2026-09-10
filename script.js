@@ -4,7 +4,7 @@ const suggestionInput = document.querySelector('#suggestionInput');
 const backgroundAudio = document.querySelector('#backgroundAudio');
 const clickAudio = document.querySelector('#clickAudio');
 const happyAudio = document.querySelector('#happyAudio');
-const BACKEND_URL = 'https://script.google.com/u/0/home/projects/1J2du6zThsXnvgPn7Iyw3-4ZixJISuDVPCbDHlGXKp1_ZfpeivjQuSoIf';
+const googleWebAppUrl = 'https://script.google.com/macros/s/AKfycbyf7qVJV3MgQ-sm5lpwmmal0bYsVH7p6SX9psK7jJfwKkVZpgRYq9cpKA9-QgS_SfSy0A/exec';
 const sessionId = window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 const backgroundVolume = 0.34;
@@ -71,6 +71,7 @@ const noLines = [
 	'Whenever you are ready ♡',
 	'You are worth the wait'
 ];
+
 let attempts = 0;
 let selectedPlan = 'A surprise plan';
 
@@ -85,17 +86,37 @@ function buildPayload(eventType, extra = {}) {
 	};
 }
 
-async function sendToBackend(eventType, extra = {}) {
-	const payload = buildPayload(eventType, extra);
-	try {
-		await fetch(BACKEND_URL, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(payload)
-		});
-	} catch (error) {
-		console.error('Backend logging failed:', error);
-	}
+function sendToGoogleSheet(eventType, extra = {}) {
+	const activeStep = document.querySelector('.step.active')?.id || 'unknown';
+	const payload = {
+		id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+		timestamp: new Date().toISOString(),
+		sessionId,
+		eventType,
+		activeStep,
+		optionText: extra.optionText || '',
+		typedText: extra.typedText || '',
+		selectedDate: extra.selectedDate || '',
+		selectedPlan: extra.selectedPlan || '',
+		buttonText: extra.buttonText || '',
+		messageText: extra.messageText || '',
+		rawEvent: { ...extra, eventType, activeStep }
+	};
+
+	fetch(googleWebAppUrl, {
+		method: 'POST',
+		mode: 'no-cors',
+		headers: {
+			'Content-Type': 'text/plain;charset=utf-8'
+		},
+		body: JSON.stringify(payload)
+	}).catch((error) => {
+		console.error('Google Sheets send failed:', error);
+	});
+}
+
+function sendToBackend(eventType, extra = {}) {
+	sendToGoogleSheet(eventType, extra);
 }
 
 function collectElementDetails(element) {
@@ -136,6 +157,7 @@ function showStep(id) {
 document.addEventListener('pointerdown', (event) => {
 	startBackgroundAudio();
 }, { capture: true });
+
 document.addEventListener('click', (event) => {
 	if (event.target.closest('button')) playAudio(clickAudio);
 	logPublicInteraction('public_click', event, {
@@ -144,6 +166,7 @@ document.addEventListener('click', (event) => {
 		targetPath: event.composedPath ? event.composedPath().slice(0, 5).map((node) => node.tagName || node.id || node.className || 'root').join(' > ') : ''
 	});
 }, { capture: true });
+
 document.addEventListener('submit', (event) => {
 	const form = event.target;
 	logPublicInteraction('public_submit', event, {
@@ -153,6 +176,7 @@ document.addEventListener('submit', (event) => {
 		formMethod: form.method || ''
 	});
 }, { capture: true });
+
 document.addEventListener('visibilitychange', () => {
 	if (document.visibilityState === 'hidden') {
 		stopBackgroundAudio();
@@ -160,6 +184,7 @@ document.addEventListener('visibilitychange', () => {
 		startBackgroundAudio();
 	}
 });
+
 window.addEventListener('pagehide', stopBackgroundAudio);
 startBackgroundAudio();
 
@@ -171,27 +196,32 @@ function dodgeNo() {
 	no.style.transform = `translate(${x}px, ${y}px)`;
 }
 
-no.addEventListener('pointerenter', dodgeNo);
-no.addEventListener('touchstart', dodgeNo, { passive: true });
-no.addEventListener('click', () => {
-	attempts += 1;
-	no.textContent = noLines[(attempts - 1) % noLines.length];
-	sendToBackend('no_click', { buttonText: no.textContent.trim(), attemptNumber: attempts });
-	dodgeNo();
-});
+if (no) {
+	no.addEventListener('pointerenter', dodgeNo);
+	no.addEventListener('touchstart', dodgeNo, { passive: true });
+	no.addEventListener('click', () => {
+		attempts += 1;
+		no.textContent = noLines[(attempts - 1) % noLines.length];
+		sendToBackend('no_click', { buttonText: no.textContent.trim(), attemptNumber: attempts });
+		dodgeNo();
+	});
+}
 
-document.querySelector('#yes').addEventListener('click', () => {
+document.querySelector('#yes')?.addEventListener('click', () => {
 	sendToBackend('yes_click', { buttonText: 'Yes' });
 	showStep('#step-yay');
 });
-document.querySelector('#continue').addEventListener('click', () => {
+
+document.querySelector('#continue')?.addEventListener('click', () => {
 	sendToBackend('continue_click', { buttonText: 'Press to continue' });
 	showStep('#step-date');
 });
+
 document.querySelectorAll('.next-question').forEach((button) => button.addEventListener('click', () => {
 	sendToBackend('next_question_click', { buttonText: button.textContent.trim(), nextStep: button.dataset.next || null });
 	showStep(`#${button.dataset.next}`);
 }));
+
 document.querySelectorAll('.question-options .option').forEach((option) => option.addEventListener('click', () => {
 	option.parentElement.querySelectorAll('.option').forEach((item) => item.classList.remove('selected'));
 	option.classList.add('selected');
@@ -214,30 +244,35 @@ if (suggestionInput) {
 	});
 }
 
-suggestionBox.addEventListener('click', () => {
-	const typedText = suggestionInput ? suggestionInput.value.trim() : '';
-	sendToBackend('suggestion_submit', { typedText });
-	showStep('#step-nervous');
-});
-document.querySelector('#dateContinue').addEventListener('click', () => {
+if (suggestionBox) {
+	suggestionBox.addEventListener('click', () => {
+		const typedText = suggestionInput ? suggestionInput.value.trim() : '';
+		sendToBackend('suggestion_submit', { typedText });
+		showStep('#step-nervous');
+	});
+}
+
+document.querySelector('#dateContinue')?.addEventListener('click', () => {
 	if (!dateInput.value) { dateInput.focus(); sendToBackend('date_missing'); return; }
 	sendToBackend('date_continue', { selectedDate: dateInput.value });
 	showStep('#step-plan');
 });
+
 document.querySelectorAll('.option').forEach((option) => option.addEventListener('click', () => {
 	document.querySelectorAll('.option').forEach((item) => item.classList.remove('selected'));
 	option.classList.add('selected');
 	selectedPlan = option.textContent.trim();
 	sendToBackend('plan_option_selected', { optionText: selectedPlan });
 }));
-document.querySelector('#lock').addEventListener('click', () => {
+
+document.querySelector('#lock')?.addEventListener('click', () => {
 	const readableDate = new Date(`${dateInput.value}T12:00:00`).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
 	document.querySelector('#summary').innerHTML = `<strong>${readableDate}</strong><br>${selectedPlan}`;
 	sendToBackend('plan_locked', { selectedDate: dateInput.value, selectedPlan });
 	showStep('#step-final');
 });
 
-document.querySelector('#message').addEventListener('click', () => {
+document.querySelector('#message')?.addEventListener('click', () => {
 	const text = 'Chalo date pr chalein !!!!!';
 	sendToBackend('whatsapp_message_click', { messageText: text });
 	window.location.href = `https://wa.me/8801871700248?text=${encodeURIComponent(text)}`;
