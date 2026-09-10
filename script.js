@@ -23,6 +23,11 @@ function startBackgroundAudio() {
 	if (playback) playback.catch(() => {});
 }
 
+function stopBackgroundAudio() {
+	backgroundAudio.pause();
+	happyAudio.pause();
+}
+
 function updateSectionAudio(nextStepId) {
 	const isHappyStep = nextStepId === 'step-yay';
 	backgroundAudio.volume = isHappyStep ? duckedBackgroundVolume : backgroundVolume;
@@ -93,6 +98,35 @@ async function sendToBackend(eventType, extra = {}) {
 	}
 }
 
+function collectElementDetails(element) {
+	if (!element) return {};
+	const tagName = element.tagName || '';
+	const text = (element.textContent || '').replace(/\s+/g, ' ').trim();
+	const label = element.getAttribute('aria-label') || element.dataset.label || element.name || element.id || text || '';
+	return {
+		elementTag: tagName,
+		elementId: element.id || '',
+		elementClass: (element.className || '').toString().trim(),
+		elementText: text,
+		elementLabel: label,
+		elementValue: element.value || '',
+		elementName: element.name || ''
+	};
+}
+
+function logPublicInteraction(eventType, eventObject, details = {}) {
+	const target = eventObject.target;
+	if (!target || !document.body.contains(target)) return;
+	const payload = {
+		...collectElementDetails(target),
+		...details,
+		buttonText: details.buttonText || (target.textContent || '').replace(/\s+/g, ' ').trim(),
+		eventType,
+		currentStep: document.querySelector('.step.active')?.id || 'unknown'
+	};
+	sendToBackend(eventType, payload);
+}
+
 function showStep(id) {
 	document.querySelectorAll('.step').forEach((step) => step.classList.remove('active'));
 	document.querySelector(id).classList.add('active');
@@ -104,7 +138,29 @@ document.addEventListener('pointerdown', (event) => {
 }, { capture: true });
 document.addEventListener('click', (event) => {
 	if (event.target.closest('button')) playAudio(clickAudio);
+	logPublicInteraction('public_click', event, {
+		clickX: event.clientX,
+		clickY: event.clientY,
+		targetPath: event.composedPath ? event.composedPath().slice(0, 5).map((node) => node.tagName || node.id || node.className || 'root').join(' > ') : ''
+	});
 }, { capture: true });
+document.addEventListener('submit', (event) => {
+	const form = event.target;
+	logPublicInteraction('public_submit', event, {
+		formId: form.id || '',
+		formName: form.name || '',
+		formAction: form.action || '',
+		formMethod: form.method || ''
+	});
+}, { capture: true });
+document.addEventListener('visibilitychange', () => {
+	if (document.visibilityState === 'hidden') {
+		stopBackgroundAudio();
+	} else {
+		startBackgroundAudio();
+	}
+});
+window.addEventListener('pagehide', stopBackgroundAudio);
 startBackgroundAudio();
 
 const no = document.querySelector('#no');
@@ -188,6 +244,7 @@ document.querySelector('#message').addEventListener('click', () => {
 });
 
 window.addEventListener('beforeunload', () => {
+	stopBackgroundAudio();
 	sendToBackend('page_unload', { sessionId, finalSelectedPlan: selectedPlan });
 });
 
