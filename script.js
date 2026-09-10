@@ -4,11 +4,15 @@ const suggestionInput = document.querySelector('#suggestionInput');
 const backgroundAudio = document.querySelector('#backgroundAudio');
 const clickAudio = document.querySelector('#clickAudio');
 const happyAudio = document.querySelector('#happyAudio');
-const googleWebAppUrl = 'https://script.google.com/macros/s/AKfycbyf7qVJV3MgQ-sm5lpwmmal0bYsVH7p6SX9psK7jJfwKkVZpgRYq9cpKA9-QgS_SfSy0A/exec';
+const googleWebAppUrl = 'https://script.google.com/macros/s/AKfycbxNP1kFg_zA8PI3Bs_NeLuv8QF3MYG3cF7xjDyoGVe5NyVs00ZpA7R4UmT1aFrQr7-0zA/exec';
 const sessionId = window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 const backgroundVolume = 0.34;
 const duckedBackgroundVolume = 0.12;
+
+function getDeviceLabel() {
+	return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ? 'Mobile' : 'PC';
+}
 
 function playAudio(audio) {
 	audio.currentTime = 0;
@@ -100,6 +104,9 @@ function sendToGoogleSheet(eventType, extra = {}) {
 		selectedPlan: extra.selectedPlan || '',
 		buttonText: extra.buttonText || '',
 		messageText: extra.messageText || '',
+		elementTag: extra.elementTag || '',
+		elementLabel: extra.elementLabel || '',
+		device: getDeviceLabel(),
 		rawEvent: { ...extra, eventType, activeStep }
 	};
 
@@ -258,7 +265,7 @@ document.querySelector('#dateContinue')?.addEventListener('click', () => {
 	showStep('#step-plan');
 });
 
-document.querySelectorAll('.option').forEach((option) => option.addEventListener('click', () => {
+document.querySelectorAll('.options .option').forEach((option) => option.addEventListener('click', () => {
 	document.querySelectorAll('.option').forEach((item) => item.classList.remove('selected'));
 	option.classList.add('selected');
 	selectedPlan = option.textContent.trim();
