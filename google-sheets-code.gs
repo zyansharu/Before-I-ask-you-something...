@@ -7,6 +7,7 @@ function authorize() {
 
 function doPost(e) {
   const sheet = getSheet_();
+  const columns = getHeaderColumns_(sheet);
   let event = {};
   try {
     event = JSON.parse(e.postData.contents || '{}');
@@ -27,12 +28,12 @@ function doPost(e) {
   try {
     const sessionRow = findSessionRow_(sheet, sessionId);
     if (sessionRow) {
-      const current = sheet.getRange(sessionRow, 1, 1, HEADERS.length).getValues()[0];
-      if (clickedItem) current[3] = appendValue_(current[3], clickedItem);
-      if (selectedAnswer) current[4] = appendValue_(current[4], selectedAnswer);
-      if (finalSubmission) current[5] = finalSubmission;
-      if (suggestionText) current[6] = suggestionText;
-      sheet.getRange(sessionRow, 1, 1, HEADERS.length).setValues([current]);
+      const current = sheet.getRange(sessionRow, 1, 1, sheet.getLastColumn()).getValues()[0];
+      if (clickedItem) current[columns.clickedItems - 1] = appendValue_(current[columns.clickedItems - 1], clickedItem);
+      if (selectedAnswer) current[columns.selectedAnswers - 1] = appendValue_(current[columns.selectedAnswers - 1], selectedAnswer);
+      if (finalSubmission) current[columns.finalSubmission - 1] = finalSubmission;
+      if (suggestionText) current[columns.suggestionText - 1] = suggestionText;
+      sheet.getRange(sessionRow, 1, 1, current.length).setValues([current]);
     } else {
       sheet.appendRow([
         timestamp,
@@ -84,6 +85,14 @@ function getSuggestionText_(event) {
   return event.suggestionText || event.typedText || '';
 }
 
+function getHeaderColumns_(sheet) {
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  return HEADERS.reduce((columns, header) => {
+    columns[header] = headers.indexOf(header) + 1;
+    return columns;
+  }, {});
+}
+
 function doGet() {
   const sheet = getSheet_();
   const values = sheet.getDataRange().getValues();
@@ -111,7 +120,10 @@ function getSheet_() {
   } else {
     const existingHeaders = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 1)).getValues()[0];
     HEADERS.forEach((header) => {
-      if (!existingHeaders.includes(header)) sheet.getRange(1, sheet.getLastColumn() + 1).setValue(header);
+      if (!existingHeaders.includes(header)) {
+        sheet.getRange(1, sheet.getLastColumn() + 1).setValue(header);
+        existingHeaders.push(header);
+      }
     });
   }
   return sheet;
