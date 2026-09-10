@@ -4,7 +4,7 @@ const suggestionInput = document.querySelector('#suggestionInput');
 const backgroundAudio = document.querySelector('#backgroundAudio');
 const clickAudio = document.querySelector('#clickAudio');
 const happyAudio = document.querySelector('#happyAudio');
-const BACKEND_URL = '/api/collect';
+const BACKEND_URL = 'https://script.google.com/u/0/home/projects/1J2du6zThsXnvgPn7Iyw3-4ZixJISuDVPCbDHlGXKp1_ZfpeivjQuSoIf';
 const sessionId = window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 const backgroundVolume = 0.34;
