@@ -1,6 +1,10 @@
 const SHEET_NAME = 'Submissions';
 const HEADERS = ['id', 'timestamp', 'sessionId', 'eventType', 'activeStep', 'optionText', 'typedText', 'selectedDate', 'selectedPlan', 'buttonText', 'messageText', 'rawEvent'];
 
+function authorize() {
+  getSheet_();
+}
+
 function doPost(e) {
   const sheet = getSheet_();
   const event = JSON.parse(e.postData.contents || '{}');
