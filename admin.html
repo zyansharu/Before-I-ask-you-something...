@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Fariha | Admin</title>
+	<link rel="stylesheet" href="style.css">
+	<style>
+		.admin-page { min-height: 100vh; padding: 34px 18px; color: #4b3542; background: linear-gradient(145deg, #5d001d, #700b2c 52%, #4b0018); font-family: 'Trebuchet MS', Arial, sans-serif; }
+		.admin-panel { width: min(1100px, 100%); margin: 0 auto; padding: 28px; border-radius: 22px; background: #fff5df; box-shadow: 0 18px 45px rgba(42, 0, 16, .24); }
+		.admin-heading { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+		.admin-heading h1 { color: #8d2342; font: bold 2.5rem/1 'Brush Script MT', 'Segoe Script', cursive; letter-spacing: 0; }
+		.admin-heading p { margin: 6px 0 0; color: #7d6570; }
+		.admin-controls { display: flex; gap: 10px; }
+		.admin-controls input { min-width: 190px; padding: 11px 13px; border: 1px solid #ddb9c2; border-radius: 10px; background: #fffaf6; }
+		.admin-controls button { padding: 11px 17px; color: #fff; background: #a52f50; }
+		.status { margin: 12px 0; color: #8d2342; font-size: .85rem; }
+		.table-wrap { overflow-x: auto; }
+		table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+		th, td { padding: 11px 10px; border-bottom: 1px solid #ead5d0; text-align: left; vertical-align: top; }
+		th { color: #8d2342; white-space: nowrap; }
+		td { min-width: 130px; }
+		.empty { padding: 35px; color: #7d6570; text-align: center; }
+		@media (max-width: 650px) { .admin-panel { padding: 20px 14px; } .admin-heading { display: block; } .admin-controls { margin-top: 16px; } .admin-controls input { min-width: 0; width: 100%; } }
+	</style>
+</head>
+<body class="admin-page">
+	<main class="admin-panel">
+		<header class="admin-heading">
+			<div><h1>Submissions</h1><p>Responses and choices from your date page.</p></div>
+			<div class="admin-controls"><input id="token" type="password" placeholder="Admin token"><button id="refresh" type="button">Refresh</button></div>
+		</header>
+		<div class="status" id="status">Loading submissions...</div>
+		<div class="table-wrap"><table><thead><tr><th>Time</th><th>Event</th><th>Page</th><th>Choice</th><th>Suggestion</th><th>Date / Plan</th></tr></thead><tbody id="entries"></tbody></table></div>
+	</main>
+	<script>
+		const token = document.querySelector('#token');
+		const status = document.querySelector('#status');
+		const entries = document.querySelector('#entries');
+		function cell(value) { const element = document.createElement('td'); element.textContent = value || '-'; return element; }
+		async function loadEntries() {
+			status.textContent = 'Loading submissions...';
+			try {
+				const response = await fetch('/api/admin', { headers: { 'X-Admin-Token': token.value } });
+				const payload = await response.json();
+				if (!response.ok) throw new Error(payload.error || 'Could not load submissions.');
+				entries.replaceChildren();
+				payload.entries.slice().reverse().forEach((entry) => {
+					const row = document.createElement('tr');
+					row.append(cell(entry.timestamp ? new Date(entry.timestamp).toLocaleString() : ''));
+					row.append(cell(entry.eventType)); row.append(cell(entry.activeStep)); row.append(cell(entry.optionText || entry.buttonText));
+					row.append(cell(entry.typedText)); row.append(cell([entry.selectedDate, entry.selectedPlan].filter(Boolean).join(' / ')));
+					entries.append(row);
+				});
+				status.textContent = `${payload.entries.length} event${payload.entries.length === 1 ? '' : 's'} recorded`;
+			} catch (error) { status.textContent = error.message; }
+		}
+		document.querySelector('#refresh').addEventListener('click', loadEntries);
+		token.addEventListener('keydown', (event) => { if (event.key === 'Enter') loadEntries(); });
+		loadEntries();
+	</script>
+</body>
+</html>

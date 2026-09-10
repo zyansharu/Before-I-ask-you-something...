@@ -1,0 +1,11 @@
+{
+  "name": "fariha-date-app",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "engines": {
+    "node": "24.x"
+  }
+}

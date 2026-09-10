@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Fariha, date?</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<audio id="backgroundAudio" src="music/background.mp3" loop preload="auto"></audio>
+	<audio id="clickAudio" src="music/Click%20sound%20effect.mp3" preload="auto"></audio>
+	<audio id="happyAudio" src="music/Happy%20Happy.mp3" preload="auto"></audio>
+	<main class="scene">
+		<lottie-player class="lottie-background" src="https://lottie.host/c527a9ba-baef-40b9-af3e-44de699703ad/gO4uZVTsb8.json" background="transparent" speed="1" loop autoplay aria-hidden="true"></lottie-player>
+		<span class="petal a">♡</span><span class="petal b">✦</span><span class="petal c">♡</span>
+		<article class="paper">
+			<section class="step active question-page" id="step-intro">
+				<div class="decor">💌 ✨</div>
+				<h1 class="script-title">Before I ask<br>you something...</h1>
+				<p class="subcopy">I might ask you a few little questions, Fariha, so I can understand the person I like a little better.</p>
+				<button class="primary next-question" data-next="step-about" type="button">I’m curious</button>
+			</section>
+			<section class="step question-page" id="step-about">
+				<div class="decor">🌷</div>
+				<h2 class="script-title">What makes<br>you feel happy?</h2>
+				<p class="subcopy">I want to learn the little things that brighten your day.</p>
+				<div class="question-options"><button class="option" type="button">Good food 🍛</button><button class="option" type="button">Music 🎶</button><button class="option" type="button">Quiet time 🌙</button><button class="option" type="button">Making people laugh ✨</button></div>
+			</section>
+			<section class="step question-page" id="step-crush">
+				<div class="decor">💭</div>
+				<h2 class="script-title">If someone<br>likes you...</h2>
+				<p class="subcopy">What kind of thoughtful gesture would make you feel happy?</p>
+				<div class="question-options"><button class="option" type="button">A sweet message 💌</button><button class="option" type="button">A thoughtful snack 🍰</button><button class="option" type="button">A calm walk 🌿</button><button class="option" type="button">Just being remembered 🌟</button></div>
+			</section>
+			<section class="step question-page" id="step-understand">
+				<div class="decor">🤍</div>
+				<h2 class="script-title">How can I<br>know you better?</h2>
+				<p class="subcopy">No pressure. I want to understand what feels right for you.</p>
+				<div class="question-options"><button class="option" type="button">Ask me gently 🌼</button><button class="option" type="button">Give me time 🌙</button><button class="option" type="button">Make me laugh 😄</button><button class="option" type="button">Be honest with me 💛</button></div>
+			</section>
+			<section class="step question-page" id="step-favourite">
+				<div class="decor">🐹 💕</div>
+				<h2 class="script-title">One last<br>little question</h2>
+				<p class="subcopy">What would make spending time together feel perfect?</p>
+				<div class="question-options"><button class="option" type="button">Snacks and stories 🍿</button><button class="option" type="button">A new place 🗺️</button><button class="option" type="button">Something cozy ☕</button><button class="option" type="button">A hamster-approved plan 🐹</button></div>
+			</section>
+			<section class="step question-page" id="step-speaking">
+				<div class="decor">💬 🌼</div>
+				<h2 class="script-title">How do you<br>like to be spoken to?</h2>
+				<p class="subcopy">I want my words to feel kind, comfortable, and right for you.</p>
+				<div class="question-options"><button class="option" type="button">Gently and honestly 🤍</button><button class="option" type="button">With a little humour 😄</button><button class="option" type="button">Short and simple 🌿</button><button class="option" type="button">With lots of warmth 💕</button></div>
+			</section>
+			<section class="step question-page" id="step-suggestion">
+				<div class="decor">📝 ✨</div>
+				<h2 class="script-title">A little<br>suggestion box</h2>
+				<p class="subcopy">Is there anything you would like me to know?</p>
+				<div class="suggestion-box-wrap">
+					<textarea id="suggestionInput" class="suggestion-input" rows="4" maxlength="500" placeholder="Write anything you want me to know..."></textarea>
+					<button class="suggestion-box" id="suggestionBox" type="button">
+						<i class="suggestion-tape" aria-hidden="true"></i>
+						<strong class="suggestion-icon" aria-hidden="true">✎</strong>
+						<strong>Click this suggestion to continue</strong>
+						<span>Go to the next page <b aria-hidden="true">→</b></span>
+					</button>
+				</div>
+			</section>
+			<section class="step question-page" id="step-nervous">
+				<div class="decor">🌙 💭</div>
+				<h2 class="script-title">A little<br>honesty</h2>
+				<p class="subcopy">I’m a little nervous asking you this. Not because I doubt you, but because you matter to me and I want to say it properly.</p>
+				<button class="primary next-question" data-next="step-reaction" type="button">I understand</button>
+			</section>
+			<section class="step question-page" id="step-reaction">
+				<div class="decor">💌 ✨</div>
+				<h2 class="script-title">I wonder<br>what you’ll say</h2>
+				<p class="subcopy">Maybe you’ll smile, maybe you’ll think about it, or maybe you’ll surprise me. Whatever you feel, I’ll respect your answer.</p>
+				<button class="primary next-question" data-next="step-question" type="button">Ask me</button>
+			</section>
+			<section class="step question-page" id="step-profile">
+				<div class="decor">🪞 💕</div>
+				<div class="profile-card">
+					<div class="profile-avatar">♡</div>
+					<p class="profile-label">a little profile</p>
+					<h2 class="script-title">How do I<br>seem to you?</h2>
+					<p class="subcopy">Choose the words that feel closest. There is no wrong answer.</p>
+				</div>
+				<div class="question-options"><button class="option" type="button">Kind and thoughtful 🌷</button><button class="option" type="button">Funny and easygoing ☀️</button><button class="option" type="button">A little shy 🌙</button><button class="option" type="button">Still a mystery ✨</button></div>
+			</section>
+			<section class="step" id="step-question">
+				<div class="decor">💕 ✨ 💕</div>
+				<h1 class="script-title">Will you go<br>out with me?</h1>
+				<p class="subcopy">Fariha, I have a tiny question for you.</p>
+				<div class="buttons"><button class="primary" id="yes" type="button">Yes</button><button class="secondary" id="no" type="button">No</button></div>
+			</section>
+			<section class="step" id="step-yay">
+				<div class="decor">💕 ✨ 💕</div>
+				<div class="tenor-gif-embed" data-postid="10674288337814969177" data-share-method="host" data-aspect-ratio="1" data-width="100%" aria-label="Celebration GIF">
+					<a href="https://tenor.com/view/happy-cat-happy-happy-cat-happy-happy-happy-cat-happy-happy-happy-cat-meme-gif-10674288337814969177" aria-label="Tenor GIF" style="display:none;">Happy Cat Happy Happy Cat Sticker</a>
+				</div>
+				<script type="text/javascript" async src="https://tenor.com/embed.js"></script>
+				<h2 class="script-title">Yay!</h2>
+				<p class="confirmation-copy">I'm so glad you said yes, Fariha.</p>
+				<button class="primary" id="continue" type="button">Press to continue</button>
+			</section>
+			<section class="step" id="step-date">
+				<div class="decor">📅 💕</div>
+				<h2 class="script-title">Pick a date</h2>
+				<p class="subcopy">Choose the day for our little plan.</p>
+				<input class="date-field" id="dateInput" type="date" aria-label="Choose a date">
+				<button class="primary" id="dateContinue" type="button">Continue</button>
+			</section>
+			<section class="step" id="step-plan">
+				<div class="decor">🍿 🌷</div>
+				<h2 class="script-title">What would you<br>like to do?</h2>
+				<p class="subcopy">Pick your favourite little plan.</p>
+				<div class="options"><button class="option" type="button">Sunset walk 🌅</button><button class="option" type="button">Street food date 🍜</button><button class="option" type="button">Coffee &amp; gossip ☕</button><button class="option" type="button">Rooftop stargazing ✨</button><button class="option" type="button">Bookstore date 📚</button><button class="option" type="button">Ice cream run 🍦</button></div>
+				<button class="primary" id="lock" type="button">Lock it in</button>
+			</section>
+			<section class="step" id="step-final">
+				<div class="decor">🐹 💕 ✨</div>
+				<h2 class="script-title">It's a date!</h2>
+				<p class="confirmation-copy">I can't wait to see you. Your hamster gets an honorary invitation.</p>
+				<div class="summary" id="summary"></div>
+				<button class="primary" id="message" type="button">Send our plan</button>
+			</section>
+		</article>
+	</main>
+	<div class="creator-tag" aria-label="Created by ahmed sharu">Created by <a href="https://www.instagram.com/zyan_sharu/" target="_blank" rel="noopener noreferrer">ahmed sharu</a></div>
+	<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+	<script src="script.js"></script>
+</body>
+</html>
