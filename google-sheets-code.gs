@@ -1,30 +1,5 @@
-const SHEET_NAME = 'Submissions';
-const HEADERS = [
-  'id',
-  'timestamp',
-  'sessionId',
-  'eventType',
-  'activeStep',
-  'optionText',
-  'typedText',
-  'selectedDate',
-  'selectedPlan',
-  'buttonText',
-  'messageText',
-  'elementTag',
-  'elementId',
-  'elementText',
-  'elementValue',
-  'elementLabel',
-  'formId',
-  'formName',
-  'formAction',
-  'formMethod',
-  'clickX',
-  'clickY',
-  'targetPath',
-  'rawEvent'
-];
+const SHEET_NAME = 'Sessions';
+const HEADERS = ['timestamp', 'sessionId', 'device', 'clickedItems', 'selectedAnswers', 'finalSubmission'];
 
 function authorize() {
   getSheet_();
@@ -39,15 +14,66 @@ function doPost(e) {
     event = {};
   }
 
-  const row = HEADERS.map((header) => {
-    if (header === 'id') return event.id || Utilities.getUuid();
-    if (header === 'timestamp') return event.timestamp || new Date().toISOString();
-    if (header === 'rawEvent') return JSON.stringify(event);
-    return event[header] ?? '';
-  });
+  const sessionId = event.sessionId || Utilities.getUuid();
+  const timestamp = event.timestamp || new Date().toISOString();
+  const device = event.device || 'Unknown';
+  const clickedItem = getClickedItem_(event);
+  const selectedAnswer = getSelectedAnswer_(event);
+  const finalSubmission = event.eventType === 'whatsapp_message_click' ? 'Submitted' : '';
 
-  sheet.appendRow(row);
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const sessionRow = findSessionRow_(sheet, sessionId);
+    if (sessionRow) {
+      const current = sheet.getRange(sessionRow, 1, 1, HEADERS.length).getValues()[0];
+      if (clickedItem) current[3] = appendValue_(current[3], clickedItem);
+      if (selectedAnswer) current[4] = appendValue_(current[4], selectedAnswer);
+      if (finalSubmission) current[5] = finalSubmission;
+      sheet.getRange(sessionRow, 1, 1, HEADERS.length).setValues([current]);
+    } else {
+      sheet.appendRow([
+        timestamp,
+        sessionId,
+        device,
+        clickedItem,
+        selectedAnswer,
+        finalSubmission
+      ]);
+    }
+  } finally {
+    lock.releaseLock();
+  }
+
   return json_({ ok: true });
+}
+
+function findSessionRow_(sheet, sessionId) {
+  if (sheet.getLastRow() < 2) return 0;
+  const sessionIds = sheet.getRange(2, 2, sheet.getLastRow() - 1, 1).getValues();
+  const index = sessionIds.findIndex((row) => String(row[0]) === String(sessionId));
+  return index === -1 ? 0 : index + 2;
+}
+
+function appendValue_(current, next) {
+  return current ? `${current} | ${next}` : next;
+}
+
+function getClickedItem_(event) {
+  const clickEvents = ['public_click', 'no_click', 'yes_click', 'continue_click', 'next_question_click', 'date_continue', 'plan_locked', 'whatsapp_message_click'];
+  if (!clickEvents.includes(event.eventType)) return '';
+  if (event.eventType === 'public_click' && event.elementTag === 'BUTTON') return '';
+  return event.buttonText || event.optionText || event.elementLabel || event.eventType;
+}
+
+function getSelectedAnswer_(event) {
+  if (event.eventType === 'question_option_selected') {
+    return `${event.currentStep || event.activeStep || 'Question'}: ${event.optionText || ''}`;
+  }
+  if (event.eventType === 'plan_option_selected') {
+    return `Plan: ${event.optionText || event.selectedPlan || ''}`;
+  }
+  return '';
 }
 
 function doGet() {
