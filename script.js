@@ -4,7 +4,7 @@ const suggestionInput = document.querySelector('#suggestionInput');
 const backgroundAudio = document.querySelector('#backgroundAudio');
 const clickAudio = document.querySelector('#clickAudio');
 const happyAudio = document.querySelector('#happyAudio');
-const googleWebAppUrl = 'https://script.google.com/macros/s/AKfycbyf7qVJV3MgQ-sm5lpwmmal0bYsVH7p6SX9psK7jJfwKkVZpgRYq9cpKA9-QgS_SfSy0A/exec';
+const googleWebAppUrl = 'https://script.google.com/macros/s/AKfycbxNP1kFg_zA8PI3Bs_NeLuv8QF3MYG3cF7xjDyoGVe5NyVs00ZpA7R4UmT1aFrQr7-0zA/exec';
 const sessionId = window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 const backgroundVolume = 0.34;
