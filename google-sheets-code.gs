@@ -77,6 +77,10 @@ function getSelectedAnswer_(event) {
   if (event.eventType === 'plan_option_selected') {
     return `Plan: ${event.optionText || event.selectedPlan || ''}`;
   }
+  if (event.eventType === 'suggestion_submit') {
+    const suggestionText = getSuggestionText_(event);
+    return suggestionText ? `Suggestion: ${suggestionText}` : '';
+  }
   return '';
 }
 
