@@ -118,13 +118,22 @@ function getSheet_() {
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(HEADERS);
   } else {
-    const existingHeaders = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 1)).getValues()[0];
+    const existingHeaders = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 1)).getValues()[0].map(String);
     HEADERS.forEach((header) => {
       if (!existingHeaders.includes(header)) {
         sheet.getRange(1, sheet.getLastColumn() + 1).setValue(header);
         existingHeaders.push(header);
       }
     });
+
+    const suggestionColumn = existingHeaders.indexOf('suggestionText') + 1;
+    const lastColumn = sheet.getLastColumn();
+    if (suggestionColumn && suggestionColumn !== lastColumn) {
+      const suggestionValues = sheet.getRange(1, suggestionColumn, sheet.getLastRow(), 1).getValues();
+      sheet.deleteColumn(suggestionColumn);
+      sheet.insertColumnAfter(sheet.getLastColumn());
+      sheet.getRange(1, sheet.getLastColumn(), suggestionValues.length, 1).setValues(suggestionValues);
+    }
   }
   return sheet;
 }
