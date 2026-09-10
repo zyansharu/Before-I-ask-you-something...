@@ -138,7 +138,7 @@ function getSheet_() {
         sheet.getRange(1, sheet.getLastColumn() + 1).setValue(header);
         headersAfterSuggestion.push(header);
       }
-    }
+    });
   }
   return sheet;
 }
